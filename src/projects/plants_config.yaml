@@ -7,12 +7,16 @@ api_key_env: TPAK-GBIF
 mapping_file: gbif-plants.yaml
 input_dir: input_files
 output_dir: output_files
-use_skiplist: False
-skipfile: null
+use_skip_list: False
+skip_file: null
 min_image_size: 0
 max_list_size: 100
 clean_newlines: true
 coordinate_workaround: true
+
+# Run deletion checking
+deletion_check: gbif
+substitution_map: sub_gbif-plants.yaml
 
 # Group rows
 group_rows: false

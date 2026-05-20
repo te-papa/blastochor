@@ -83,7 +83,7 @@ class Harvester():
         if read_config("record_limit"):
             record_limit = read_config("record_limit")
         else:
-            record_limit = stats.initial_result_count
+            record_limit = stats.initial_record_count
 
         page_count = ceil(record_limit / size)
 
@@ -199,6 +199,8 @@ class Harvester():
         memo_check = retrieve_from_memo(record["pid"])
         if memo_check:
             if memo_check["status"] == "received":
+                return False
+            if memo_check["status"] == "skip":
                 return False
             elif memo_check["status"] == "pending":
                 update_memo(record["pid"], "status", "received")

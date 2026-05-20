@@ -1,0 +1,121 @@
+# Mapfile for creating Wikidata items for type specimens - see also SDC file
+
+# Record-level conditions
+reject_if do
+    fetch("hasRepresentation").absent?
+end
+
+# Hardcoded attributes
+
+# Variable attributes
+attribute :record_id, path: "id"
+
+attribute :informationWithheld do
+    if memo_check(compose("tepapa:collections/fieldcollection/", fetch("evidenceFor.atEvent.id")), "flag_restrictedLocality").present?
+	set_value("something something standard statement")
+	fallback(fetch("informationWithheld"))
+end
+
+attribute :atEvent, path: "evidenceFor.atEvent"
+
+attribute :atLocation do
+    get(:atEvent).fetch("atLocation")
+end
+
+attribute :recordedBy do
+    get(:atEvent).fetch("recordedBy")
+end
+
+attribute :collectionEvent do
+    get(:atEvent).fetch("id").lookup("fieldcollection")
+end
+
+attribute :currentIdentification do
+    fetch("identification").first
+end
+
+attribute :currentTypeStatus do
+    get(:currentIdentification).fetch("typeStatus")
+end
+
+attribute :currentTaxon do
+    get(:currentIdentification).fetch("id").lookup("taxon")
+end
+
+# Record-level enrichments
+enrichment :coordinateWorkaround do
+    local(:emuRecord, get(:collectionEvent).fetch("id").use_mapping(:emu_events))
+	replace(get(:atLocation).fetch("mappingCentroid.lat"), get_local(:emuRecord).fetch("centroidLatOrWhatever"))
+	replace(get(:atLocation).fetch("mappingCentroid.lon"), get_local(:emuRecord).fetch("centroidLonOrWhatever"))
+	AND SO ON AND SO ON
+end
+
+# Output fields
+# Todo: use Wikidata property ids instead of labels (or both?)
+
+# Todo: find all identifications with type statuses so they're included in label and description
+field :label do
+    fetch("identification...")
+end
+
+# Todo: potentially add other alt labels?
+field :altLabels do
+    fetch("identifier")
+end
+
+field :description do
+    fetch("identification...")
+end
+
+# Todo: allow default to be a list of values
+field :instanceOf, default: "Q1061403, Q137936990"
+
+# Todo: look for url in related links
+field :image, default: ""
+
+field :collection, default "Q915603"
+
+field :inventoryNumber do
+    fetch("identifier")
+end
+
+# Todo: apply date type conversion
+field :collectionDate do
+    get(:atEvent).fetch("date")
+end
+
+# Todo: get stateProvince/country if more precise levels not available
+field :locationCollected do
+    get(:atLocation).fetch("locality")
+end
+
+field :coordinateLocation do
+    compose(get(:atLocation).fetch("decimalLatitude"), ", ", get(:atLocation).fetch("decimalLongitude"))
+end
+
+field :nomenclaturalTypeOf do
+    get(:currentTaxon).fetch("scientificName")
+end
+
+# Todo: the other stuff that finds a Wikidata id
+field :collector do
+    get(:recordedBy).fetch("id").lookup("agent").fetch("related")
+end
+
+field :specimenClassifier do
+    get(:currentTaxon).lookup("identifiedBy").fetch("id").lookup("agent").fetch("related")
+end
+
+field :describedAtUrl do
+    compose("https://collections.tepapa.govt.nz/object/", get(:id))
+end
+
+# Todo: map provided terms to male organism or female organism
+field :sexOrGender do
+    fetch("sex")
+end
+
+# Todo: map provided terms of relevant QIDs
+field :biologicalPhase do
+    fetch("lifeStage")
+end

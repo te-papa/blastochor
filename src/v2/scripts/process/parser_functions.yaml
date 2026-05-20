@@ -1,0 +1,31 @@
+# All functions have an optional final 'default' parameter unless otherwise specified
+fetch:
+  name: fetch
+  label: Fetch
+  description: Get the value found at a given path
+  parameters:
+    - name: path
+      required: true
+      value_type: string
+      regex: '^[\w\s_().]+'
+get:
+  name: get
+  label: Get
+  description: Get the value stored in an attribute
+  parameters:
+    - name: attribute
+      required: true
+      value_type: string
+      regex: '^:[\w_]+'
+mapping:
+  name: mapping
+  label: Mapping
+  description: Map a value to a new value using a dictionary or an external source
+  parameters:
+    - name: mapping_dict
+      required: false
+      value_type: dict
+    - name: mapping_source
+      required: false
+      value_type: string
+      regex: '^:[\w_]+'

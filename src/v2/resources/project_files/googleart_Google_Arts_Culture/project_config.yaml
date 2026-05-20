@@ -1,0 +1,65 @@
+# Project overrides of app config
+api_key_env: TPAK-GBIF
+clean_newlines: true
+quiet: true
+timeout: 10
+attempts: 3
+
+# Project config
+load_in:
+  - name: country_code
+    source: resources/countrycodes.xml
+  - name: emu_events
+    source: resources/collectionevents.xml
+
+
+query_mode: scroll
+record_limit: 0
+record_id_list: null
+skip_list: null
+
+
+# Pre-processing
+coordinate_workaround: true
+restrict_sensitive_locations: true
+deletion_check_map: project_mapping_deleted.txt
+
+# Output config
+output_dir: output_files
+max_list_length: 100
+
+
+
+
+---
+# Blastochor config for GBIF Plants collection dataset
+# Don't change these values - create a new project instead
+
+# Setup
+api_key_env: TPAK-GBIF
+mapping_file: gbif-plants.yaml
+input_dir: input_files
+output_dir: output_files
+use_skip_list: False
+skip_file: null
+min_image_size: 0
+max_list_size: 100
+clean_newlines: true
+coordinate_workaround: true
+
+# Run deletion checking
+deletion_check: gbif
+substitution_map: sub_gbif-plants.yaml
+
+# Group rows
+group_rows: false
+parent_label: null
+parent_fields:
+  include: null
+  fields: null
+child_fields:
+  include: null
+  fields: null
+ungrouped_fields:
+  include: null
+  fields: null

@@ -1,0 +1,111 @@
+# Mapfile for creating structured data for holotype images uploaded to Wiki Commons - see also items
+
+# Todo: use transpose to get all images
+
+# Record-level conditions
+reject_if do
+    fetch("hasRepresentation").absent?
+end
+
+# Hardcoded attributes
+
+# Variable attributes
+attribute :record_id, path: "id"
+
+attribute :informationWithheld do
+    if memo_check(compose("tepapa:collections/fieldcollection/", fetch("evidenceFor.atEvent.id")), "flag_restrictedLocality").present?
+	set_value("something something standard statement")
+	fallback(fetch("informationWithheld"))
+end
+
+attribute :currentIdentification do
+    fetch("identification").first
+end
+
+attribute :currentTypeStatus do
+    get(:currentIdentification).fetch("typeStatus")
+end
+
+attribute :currentTaxon do
+    get(:currentIdentification).fetch("id").lookup("taxon")
+end
+
+# Output fields
+# Todo: use Wikidata property ids instead of labels (or both?)
+
+# Todo: find all identifications with type statuses so they're included in filename and caption
+field :fileName do
+    fetch("identification...")
+end
+
+field :caption do
+    fetch("identification...")
+end
+
+# Post-processing: Find currently accepted name's QID from type name
+field :depictsAcceptedName do
+    get(:currentTaxon).fetch("scientificName")
+end
+
+field :depictsType, default: "Q1061403"     # holotype
+
+# Todo: get all type names
+# Post-processing: Match to Wikidata item(s)
+field :depictsTypeNames do
+    get(:currentTaxon).fetch("scientificName")
+end
+
+field :copyrightStatus, default: "Q50423863"
+
+field :copyrightLicense, default: "Q20007257"
+
+
+
+
+
+field :collection, default "Q915603"
+
+field :inventoryNumber do
+    fetch("identifier")
+end
+
+# Todo: apply date type conversion
+field :collectionDate do
+    get(:atEvent).fetch("date")
+end
+
+# Todo: get stateProvince/country if more precise levels not available
+field :locationCollected do
+    get(:atLocation).fetch("locality")
+end
+
+field :coordinateLocation do
+    compose(get(:atLocation).fetch("decimalLatitude"), ", ", get(:atLocation).fetch("decimalLongitude"))
+end
+
+field :nomenclaturalTypeOf do
+    get(:currentTaxon).fetch("scientificName")
+end
+
+# Todo: the other stuff that finds a Wikidata id
+field :collector do
+    get(:recordedBy).fetch("id").lookup("agent").fetch("related")
+end
+
+field :specimenClassifier do
+    get(:currentTaxon).lookup("identifiedBy").fetch("id").lookup("agent").fetch("related")
+end
+
+field :describedAtUrl do
+    compose("https://collections.tepapa.govt.nz/object/", get(:id))
+end
+
+# Todo: map provided terms to male organism or female organism
+field :sexOrGender do
+    fetch("sex")
+end
+
+# Todo: map provided terms of relevant QIDs
+field :biologicalPhase do
+    fetch("lifeStage")
+end

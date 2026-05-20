@@ -1,0 +1,219 @@
+# Mapfile for Google Arts & Culture uploads
+
+# Record-level conditions
+reject_if do
+    fetch("hasRepresentation").absent?
+end
+
+reject_if do
+    fetch("hasRepresentation.rights.allowsDownload").absent?
+end
+
+# Hardcoded attributes
+
+# Variable attributes
+attribute :record_id, path: "id"
+
+attribute :previousIdentifier, path: "previousIdentifier"
+
+attribute :informationWithheld, path: "informationWithheld"
+
+attribute :atEvent, path: "evidenceFor.atEvent"
+
+attribute :atLocation do
+    get(:atEvent).fetch("atLocation")
+end
+
+attribute :recordedBy do
+    get(:atEvent).fetch("recordedBy")
+end
+
+attribute :collectionEvent do
+    get(:atEvent).fetch("id").lookup("fieldcollection")
+end
+
+attribute :identification do
+    fetch("identification")
+end
+
+attribute :currentIdentification do
+    get(:identification).first
+end
+
+attribute :currentTypeStatus do
+    get(:currentIdentification).fetch("typeStatus")
+end
+
+attribute :currentTaxon do
+    get(:currentIdentification).fetch("id").lookup("taxon")
+end
+
+attribute :images do
+    fetch("hasRepresentation")
+end
+
+attribute :imageCount do
+    get(:images).count
+end
+
+# Enrichments
+enrichment :transposeAll do
+    transpose(:all)
+end
+
+enrichment :transposeImages do
+    transpose(get(:images).for_each(local(:currentImage, this)), multiple)
+end
+
+
+# Output fields
+@transposeAll
+field :itemid do
+	get(:pid)
+end
+
+@transposeImages
+field :subitemid do
+	if get(:imageCount).gt(1)?
+	compose(get(:pid), ".", get(:currentImage).fetch("id"))
+end
+
+@transposeImages
+field :orderid do
+	if get(:imageCount).gt(1)?
+	get(:currentImage).index
+end
+
+field :customtext:registrationid do
+    fetch("identifier")
+end
+
+field :title do
+    fetch("title")
+end
+
+field :description do
+    fetch("description").truncate(2000, "...")
+end
+
+field :creator do
+    # SORT THIS OUTTTTT
+    get(:production).for_each(fetch("contributor.title"))
+end
+
+field :location:placename do
+    get(:production).for_each(fetch("spatial.prefLabel"))
+end
+
+field :dateCreated:start do
+    get(:production).first.fetch("createdDate")
+end
+
+field :dateCreated:display do
+    get(:production).first.fetch("verbatimCreatedDate")
+end
+
+@transposeImages
+field :rights do
+	get(:currentImage).fetch("rights.title")
+end
+
+field :format do
+    fetch("observedDimension").first("title")
+end
+
+field :medium do
+    fetch("isMadeOfSummary")
+end
+
+field :subject do
+    fetch("depicts.i.title", "influencedBy.i.title")
+end
+
+field :art=support do
+    fetch("isMadeOf").for_each(if fetch("title").is_in("canvas", "paper", "plaster", "cardboard", "ceramic", "wood", "clay")? fetch("title"))
+end
+
+field :art=depictedLocation do
+    fetch("depicts").for_each(if fetch("type").is("Place")? fetch("title"))
+end
+
+field :art=depictedPerson do
+    fetch("depicts").for_each(if fetch("type").is("Person")? fetch("title"))
+end
+
+field :art=genre do
+    fetch("depicts.i.title").for_each(use_mapping(:art_genres))
+end
+
+field :customtext:specimenType do
+    fetch("specimenType")
+end
+
+field :customtext:dateCollected do
+    get(:atEvent).fetch("eventDate")
+end
+
+field :customtext:creator.collector do
+    get(:recordedBy).fetch("title")
+end
+
+field :customtext:locationCollected do
+    get(:atLocation).fetch("title")
+end
+
+field :customtext:dateIdentified do
+    get(:currentIdentification.fetch("dateIdentified")
+end
+
+field :customtext:collector.identifier do
+    get(:currentIdentification).fetch("identifiedBy.title")
+end
+
+field :customtext:qualifiedName do
+    get(:currentIdentification).fetch("qualifiedName")
+end
+
+field :customtext:commonName do
+    get(:currentIdentification).fetch("vernacularName.i.title")
+end
+
+field :provenance do
+    fetch("creditLine")
+end
+
+field :priority do
+	rand_int(<min, max>)
+end
+
+@NEEDS A DIFFERENT ENRICHMENT I THINK
+field :filetype do
+    if get(:imageCount).gt(1)? set_value("sequence")
+	fallback(set_value("image")
+end
+
+field :filespec do
+    # SORT THIS OUTTTTT
+end
+
+field :relation:url do
+    compose("https://collections.tepapa.govt.nz/object/", get(:record_id)
+end
+
+field :relation:text, default: "Te Papa Collections Online"
+
+field downloadUrl do
+    if get(:transposeImages).true? transpose(:images, :currentImage)
+	fallback(local(:currentImage, get(:images).first))
+    get(:currentImage).fetch("contentUrl")
+end
+
+field object_irn do
+    get(:record_id)
+end
+
+field media_irn do
+	if get(:transposeImages).true? transpose(:images, :currentImage)
+	fallback(local(:currentImage, get(:images).first))
+    get(:currentImage).fetch("id")
+end

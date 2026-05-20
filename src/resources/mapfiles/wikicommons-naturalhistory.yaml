@@ -1,9 +1,9 @@
----
 - label: wikicommons
   reference_column: null
   primary_endpoint: object
-  explode: hasRepresentation
+  explode: null
   reduce: null
+  requires: null
   extend:
     - endpoint: agent
       path: identification.i.identifiedBy.id, evidenceFor.atEvent.recordedBy.i.id
@@ -131,6 +131,9 @@
     - mediaIrn:
       - literal:
           path: hasRepresentation.i.id
+    - mediaIdentifier:
+      - literal:
+          path: hasRepresentation.i.identifier
     - mediaWidth:
       - literal:
           path: hasRepresentation.i.width

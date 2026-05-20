@@ -1,0 +1,40 @@
+output_label:
+  required: false
+  allow_multiple: true
+queries:
+  required: true
+  allow_multiple: true
+  children:
+    - q
+    - endpoint
+    - filters
+    - sort
+    - size
+q:
+  required: false
+  allow_multiple: false
+endpoint:
+  required: false
+  allow_multiple: false
+filters:
+  required: false
+  allow_multiple: true
+  children:
+    - type
+    - field
+    - value
+type:
+  required: false
+  allow_multiple: false # Todo: identify the available options and add as a validation
+field:
+  required: false
+  allow_multiple: false
+value:
+  required: false
+  allow_multiple: true
+sort:
+  required: false
+  allow_multiple: false
+size:
+  required: false
+  allow_multiple: false

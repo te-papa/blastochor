@@ -8,8 +8,8 @@ api_key_env: TE-PAPA-KEY
 mapping_file: contactsheet.yaml
 input_dir: input_files
 output_dir: output_files
-use_skiplist: False
-skipfile: null
+use_skip_list: true
+skip_file: googleart_associations.csv
 min_image_size: 0
 max_list_size: 100
 clean_newlines: true
@@ -35,7 +35,7 @@ restrict_locality: true
 emufile: null
 
 # Run
-mode: list
+mode: scroll
 quiet: true
 base_url: https://data.tepapa.govt.nz/collection
 endpoint: object
@@ -43,7 +43,7 @@ timeout: 10
 attempts: 3
 
 # List mode settings
-list_source: nancyadams-watercolours.txt
+list_source: 202512-googleart.csv
 
 # Search/scroll mode settings
 record_limit: null
@@ -53,7 +53,7 @@ query: "*"
 sort: -_meta.modified
 
 filter:
-  collection: null
-  allows_download: null
+  collection: Art
+  allows_download: true
   keyword_fields: null
   keyword_values: null

@@ -12,5 +12,4 @@ extension_keys:
   - path
   - for_label
 requires_keys:
-  - path
-  - condition
+  - condition_type

@@ -1,0 +1,20 @@
+- export_file_id: 80234hnf0q23f
+  export_file_name: core
+  reference_column: null
+  explode: null
+  reduce: null
+  requires: null
+  extend: null
+  fields:
+    - occurrenceID:
+        get: pid
+    - title:
+        get: title
+    - typeStatus:
+        get: identification.i.toTaxon.typeStatus
+        split: " ("
+        keep: 0
+    - url:
+        get: id
+        format_string:
+          string: "https://collections.tepapa.govt.nz/object/{}"

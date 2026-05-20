@@ -1,0 +1,354 @@
+# Mapfile for GBIF plants records - core file
+
+# Record-level conditions
+reject_if do
+    fetch("hasRepresentation").absent?
+end
+
+# Hardcoded attributes
+
+# Variable attributes
+attribute :record_id, path: "id"
+
+attribute :previousIdentifier, path: "previousIdentifier"
+
+attribute :informationWithheld do
+    if memo_check(compose("tepapa:collections/fieldcollection/", fetch("evidenceFor.atEvent.id")), "flag_restrictedLocality").present?
+	set_value("something something standard statement")
+	fallback(fetch("informationWithheld"))
+end
+
+attribute :atEvent, path: "evidenceFor.atEvent"
+
+attribute :atLocation do
+    get(:atEvent).fetch("atLocation")
+end
+
+attribute :recordedBy do
+    get(:atEvent).fetch("recordedBy")
+end
+
+attribute :collectionEvent do
+    get(:atEvent).fetch("id").lookup("fieldcollection")
+end
+
+attribute :currentIdentification do
+    fetch("identification").first
+end
+
+attribute :currentTypeStatus do
+    get(:currentIdentification).fetch("typeStatus")
+end
+
+attribute :currentTaxon do
+    get(:currentIdentification).fetch("id").lookup("taxon")
+end
+
+# Record-level enrichments
+enrichment :coordinateWorkaround do
+    local(:emuRecord, get(:collectionEvent).fetch("id").use_mapping(:emu_events))
+	replace(get(:atLocation).fetch("mappingCentroid.lat"), get_local(:emuRecord).fetch("centroidLatOrWhatever"))
+	replace(get(:atLocation).fetch("mappingCentroid.lon"), get_local(:emuRecord).fetch("centroidLonOrWhatever"))
+	AND SO ON AND SO ON
+end
+
+# Output fields
+
+field :occurrenceID do
+    fetch("pid")
+end
+
+field :type do
+    fetch("additionalType").first
+end
+
+field :created do
+    fetch("_meta.created")
+end
+
+field :modified do
+    fetch("_meta.modified")
+end
+
+field :language, default: "en"
+
+field :license, default "Creative Commons Attribution 4.0 International license (CC BY 4.0)"
+
+field :rightsHolder do
+    fetch("rightsHolder")
+end
+
+field :accessRights do
+    fetch("accessRights")
+end
+
+field :references do
+    compose("https://collections.tepapa.govt.nz/object/", get(:record_id))
+end
+
+field :institutionID, default: "https://scientific-collections.gbif.org/institution/2749cf1e-60d9-4b03-9c71-3763632b8f78"
+
+field :collectionID, default: "https://scientific-collections.gbif.org/collection/6b5044bb-5fff-49ef-89c1-f52ae9e81550"
+
+field :datasetID, default: "tepapa:collection/dataset/plants"
+
+field :institutionCode, default: "NMNZ"
+
+field :collectionCode, default: "WELT"
+
+field :datasetName, default: "WELT Herbarium at Museum of New Zealand Te Papa Tongarewa"
+
+field :ownerInstitutionCode, default: "NMNZ"
+
+field :basisOfRecord do
+    fetch("basisOfRecord")
+end
+
+field :informationWithheld
+
+field :dataGeneralizations do
+    fetch("dataGeneralizations")
+end
+
+field :catalogNumber do
+    fetch("identifier")
+end
+
+field :recordNumber do
+    get(:previousIdentifier)
+	for_each(if get("notes").lower.is_in("collector's number", "collector number", "collector(s) number")? fetch("identifier"))
+end
+
+field :recordedBy do
+    get(:recordedBy).fetch("title")
+end
+
+field :recordedByID do
+    get(:recordedBy)
+	for_each(fetch("id")
+	    lookup("agent")
+		fetch("related").sort_by("title")
+		for_each(if fetch("title").lower.is_in("orcid", "wikidata")?).first
+		fetch("contentUrl"))
+		
+field :sex do
+    fetch("sex").split(", ")
+end
+
+field :lifeStage do
+    fetch("lifeStage").split(", ")
+end
+
+field :occurrenceStatus, default: "present"
+
+field :preparations do
+    fetch("specimenType")
+end
+
+field :otherCatalogNumbers do
+    get(:previousIdentifier)
+	for_each(if get("notes").lower.is_in("other institutions number")? fetch("identifier"))
+end
+
+field :eventID do
+    get(:atEvent).fetch("pid")
+end
+
+field :fieldNumber do
+    get(:collectionEvent).fetch("fieldNumber")
+end
+
+field :eventDate do
+    get(:atEvent).fetch("eventDate")
+end
+
+field :verbatimEventDate do
+    get(:atEvent).fetch("verbatimEventDate")
+end
+
+field :habitat do
+    get(:collectionEvent).fetch("habitat")
+end
+
+field :samplingProtocol do
+	get(:collectionEvent).fetch("samplingProtocol")
+end
+
+field :fieldNotes do
+    get(:collectionEvent).fetch("fieldNotes")
+end
+
+field :continent do
+    get(:atLocation).fetch("continent")
+end
+
+field :waterBody do
+    get(:atLocation).fetch("waterBody")
+end
+
+field :islandGround do
+    get(:atLocation).fetch("islandGround")
+end
+
+field :island do
+    get(:atLocation).fetch("island")
+end
+
+field :country do
+    get(:atLocation).fetch("country")
+end
+
+field :countryCode do
+    get(:atLocation).fetch("country")
+	mapping(:country_code)
+end
+
+field :stateProvince do
+    get(:atLocation).fetch("stateProvince")
+end
+
+field :locality do
+    if get(:informationWithheld).absent?
+	get(:atLocation).fetch("locality")
+end
+
+field :verbatimElevation do
+    get(:collectionEvent).fetch("atLocation.verbatimElevation")
+end
+
+field :minimumElevationInMeters do
+    get(:collectionEvent).fetch("atLocation.minimumElevationInMeters")
+end
+
+field :maximumElevationInMeters do
+    get(:collectionEvent).fetch("atLocation.maximumElevationInMeters")
+end
+
+field :verbatimDepth do
+    get(:collectionEvent).fetch("atLocation.verbatimDepth")
+end
+
+field :minimumDepthInMeters do
+    get(:collectionEvent).fetch("atLocation.minimumDepthInMeters")
+end
+
+field :maximumDepthInMeters do
+    get(:collectionEvent).fetch("atLocation.maximumDepthInMeters")
+end
+
+field :minimumDistanceAboveSurfaceInMeters do
+    get(:collectionEvent).fetch("atLocation.minimumDistanceAboveSurfaceInMeters")
+end
+
+field :maximumDistanceAboveSurfaceInMeters do
+    get(:collectionEvent).fetch("atLocation.maximumDistanceAboveSurfaceInMeters")
+end
+
+field :decimalLatitude do
+    if get(:informationWithheld).absent?
+    get(:collectionEvent).fetch("atLocation.mappingDetails").first.fetch("decimalLatitude")
+end
+
+field :decimalLongitude do
+    if get(:informationWithheld).absent?
+    get(:collectionEvent).fetch("atLocation.mappingDetails").first.fetch("decimalLongitude")
+end
+
+field :geodeticDatum do
+    if get(:informationWithheld).absent?
+    get(:collectionEvent).fetch("atLocation.mappingDetails").first.fetch("geodeticDatum")
+end
+
+field :georeferenceSources do
+    get(:collectionEvent).fetch("atLocation.georeferenceSources")
+end
+
+field :identificationID do
+	compose("tepapa:collection/identification", get(:id), "/", get(:currentTaxon).fetch("id"))
+end
+
+field :identificationQualifier do
+	local(:currentQualifier, get(:currentIdentification).fetch("qualifier"))
+	local(:qualifiedName, get(:currentTaxon).fetch("subspecies", "species", "genus").first)
+	if get_local(:currentQualifier).is_in("?", "s.l.", "s.s")?
+	compose(get_local(:qualifiedName), " ", get_local(:currentQualifier))
+	fallback(if get_local(:currentQualifier).is_in("aff.", "cf.")?
+	    compose(get_local(:currentQualifier), " ", get_local(:qualifiedName)))
+end
+
+field :verbatimIdentification do
+    get(:currentIdentification).fetch("qualifiedName")
+end
+
+field :typeStatus do
+    get(:currentIdentification).fetch("typeStatus").strip(" (possible)")
+end
+
+field :identifiedBy do
+	get(:currentIdentification).fetch("identifiedBy.title")
+end
+
+field :identifiedByID do
+    get(:currentIdentification).fetch("identifiedBy.id")
+	lookup("agent")
+	fetch("related").sort_by("title")
+	for_each(if fetch("title").lower.is_in("orcid", "wikidata")?).first
+	fetch ("contentUrl")
+end
+
+field :dateIdentified do
+    get(:currentIdentification).fetch("dateIdentified")
+end
+
+field :identificationRemarks do
+    if get(:currentTypeStatus).contains(" (possible)")?
+	compose(get(:currentTypeStatus).strip("(possible)").capitalise, "status uncertain")
+end
+
+field :scientificName do
+    get(:currentTaxon).fetch("scientificName")
+end
+
+field :taxonRank do
+    get(:currentTaxon).fetch("taxonRank")
+end
+
+field :scientificNameAuthorship do
+    get(:currentTaxon).fetch("scientificNameAuthorshipSummary")
+end
+
+field :higherClassification do
+    get(:currentTaxon).fetch("higherClassification")
+end
+
+field :family do
+    get(:currentTaxon).fetch("family")
+end
+
+field :subfamily do
+    get(:currentTaxon).fetch("subfamily")
+end
+
+field :genus do
+    get(:currentTaxon).fetch("genus")
+end
+
+field :subgenus do
+    get(:currentTaxon).fetch("subgenus")
+end
+
+field :specificEpithet do
+    get(:currentTaxon).fetch("species")
+end
+
+field :infraspecificEpithet do
+    get(:currentTaxon).fetch("subspecies")
+end
+
+field :vernacularName do
+    get(:currentTaxon).fetch("vernacularName.title")
+end
+
+field :nomenclaturalCode do
+    get(:currentTaxon).fetch("nomenclaturalCode)
+end

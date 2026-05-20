@@ -1,4 +1,3 @@
----
 - label: core
   reference_column: null
   primary_endpoint: object
@@ -38,11 +37,11 @@
       - hardcoded:
           value: Creative Commons Attribution 4.0 International license (CC BY 4.0)
     - rightsHolder:
-      - hardcoded:
-          value: Museum of New Zealand Te Papa Tongarewa
+      - literal:
+          path: rightsHolder
     - accessRights:
-      - hardcoded:
-          value: https://data.tepapa.govt.nz/docs/
+      - literal:
+          path: accessRights
     - references:
       - format_string:
           string: https://collections.tepapa.govt.nz/object/{}
@@ -73,14 +72,10 @@
           path: basisOfRecord
     - informationWithheld:
       - literal:
-          path: restrictLocalityData
-      - map_value:
-          true: precise location information not given for threatened species and associated specimens
+          path: informationWithheld
     - dataGeneralizations:
       - literal:
-          path: restrictLocalityData
-      - map_value:
-          true: coordinates and precise locality data removed
+          path: dataGeneralizations
     - catalogNumber:
       - literal:
           path: identifier
@@ -106,9 +101,13 @@
     - sex:
       - literal:
           path: sex
+      - split_on:
+          delimiter: ", "
     - lifeStage:
       - literal:
           path: lifeStage
+      - split_on:
+          delimiter: ", "
     - occurrenceStatus:
       - hardcoded:
           value: present
@@ -180,8 +179,11 @@
           path: evidenceFor.atEvent.atLocation.stateProvince
     - locality:
       - continue_if:
-          path: restrictLocalityData
-          condition: false
+          predicate: equals
+          value: false
+          functions:
+            - literal:
+                path: informationWithheld
       - literal:
           path: evidenceFor.atEvent.atLocation.locality
     - verbatimElevation:
@@ -242,8 +244,11 @@
           path: atLocation.maximumDistanceAboveSurfaceInMeters
     - decimalLatitude:
       - continue_if:
-          path: restrictLocalityData
-          condition: false
+          predicate: equals
+          value: false
+          functions:
+            - literal:
+                path: informationWithheld
       - literal:
           path: evidenceFor.atEvent.id
       - lookup:
@@ -252,8 +257,11 @@
           path: atLocation.mappingDetails.i.decimalLatitude
     - decimalLongitude:
       - continue_if:
-          path: restrictLocalityData
-          condition: false
+          predicate: equals
+          value: false
+          functions:
+            - literal:
+                path: informationWithheld
       - literal:
           path: evidenceFor.atEvent.id
       - lookup:
@@ -262,8 +270,11 @@
           path: atLocation.mappingDetails.i.decimalLongitude
     - geodeticDatum:
       - continue_if:
-          path: restrictLocalityData
-          condition: false
+          predicate: equals
+          value: false
+          functions:
+            - literal:
+                path: informationWithheld
       - literal:
           path: evidenceFor.atEvent.id
       - lookup:
@@ -290,9 +301,8 @@
           path: identification.i.qualifiedName
     - typeStatus:
       - format_string:
-          string: "{} of {}"
-          path: identification.i.typeStatus, identification.i.toTaxon.scientificName
-          required: true
+          string: "{}"
+          path: identification.i.typeStatus
           strip: " (possible)"
     - identifiedBy:
       - literal:
@@ -380,7 +390,7 @@
           path: nomenclaturalCode
 
 - label: identification
-  reference_column: OccurrenceID
+  reference_column: occurrenceID
   primary_endpoint: object
   explode: identification
   reduce: identification
@@ -400,9 +410,8 @@
           path: qualifiedName
     - typeStatus:
       - format_string:
-          string: "{} of {}"
-          path: typeStatus, toTaxon.scientificName
-          required: True
+          string: "{}"
+          path: typeStatus
           strip: " (possible)"
     - identifiedBy:
       - literal:
@@ -516,16 +525,20 @@
           path: nomenclaturalCode
 
 - label: multimedia
-  reference_column: OccurrenceID
+  reference_column: occurrenceID
   primary_endpoint: object
   explode: hasRepresentation
   reduce: null
   extend: null
   requires:
-    - path: hasRepresentation.i.rights.allowsDownload
-      condition: true
-    - path: restrictLocalityData
-      condition: false
+    - condition_type: and
+      conditions:
+      - path: hasRepresentation.i.rights.allowsDownload
+        condition_type: bool
+        match: true
+      - path: informationWithheld
+        condition_type: bool
+        match: false
   fields:
     - type:
       - literal:

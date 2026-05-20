@@ -1,4 +1,3 @@
----
 - label: googleart
   reference_column: null
   primary_endpoint: object
@@ -34,6 +33,9 @@
       - literal:
            path: description
       - clean_html: null
+      - truncate:
+          length: 2000
+          suffix: ...
     - creator:
       - collate_list:
           path: production.i
@@ -48,20 +50,6 @@
     - location:placename:
       - literal:
           path: production.i.spatial.prefLabel
-    - location:lat:
-      - literal:
-          path: production.i.spatial.id
-      - lookup:
-          endpoint: place
-      - literal:
-          path: geoLocation.lat
-    - location:long:
-      - literal:
-          path: production.i.spatial.id
-      - lookup:
-          endpoint: place
-      - literal:
-          path: geoLocation.lon
     - dateCreated:start:
       - literal:
           path: production.i.createdDate
@@ -151,7 +139,7 @@
           other: image
     - filespec:
       - format_string:
-          string: Te Papa {} {}
+          string: tepapa_{}_{}
           path: id, hasRepresentation.i.id
       - create_filename:
           suffix: jpg
@@ -165,3 +153,9 @@
     - downloadUrl:
       - literal:
           path: hasRepresentation.i.contentUrl
+    - object_irn:
+      - literal:
+          path: id
+    - media_irn:
+      - literal:
+          path: hasRepresentation.i.id

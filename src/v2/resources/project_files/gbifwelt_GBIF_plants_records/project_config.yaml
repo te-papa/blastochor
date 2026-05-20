@@ -1,0 +1,35 @@
+# Project overrides of app config
+api_key_env: TPAK-GBIF
+clean_newlines: true
+quiet: true
+timeout: 10
+attempts: 3
+
+# Project config
+
+## External data sources
+load_in:
+  - name: country_code
+    source: resources/countrycodes.xml
+  - name: emu_events
+    source: resources/collectionevents.xml
+
+## Query config
+query_mode: scroll
+record_limit: 0
+record_id_list: null
+skip_list: null
+
+# Pre-processing
+dataset_processing_script: dataset.txt
+coordinate_workaround: true
+restrict_sensitive_locations: true
+deletion_check_map: project_mapping_deleted.txt
+
+# Output config
+output_dir: output_files
+max_list_length: 100
+outputs:
+  - core
+  - identification
+  - multimedia

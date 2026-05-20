@@ -1,0 +1,67 @@
+# Mapfile for GBIF plants records - identification file
+
+# Record-level conditions
+reject_if do
+    fetch("hasRepresentation").absent?
+end
+
+reject_if do
+    fetch("informationWithheld".present?
+end
+
+# Hardcoded attributes
+
+# Variable attributes
+attribute :record_id, path: "id"
+
+attribute :images, path: "hasRepresentation"
+
+# Record-level enrichments
+enrichment :transposeImages do
+    transpose(get(:images), local(:thisImage, this)) # defaults to 'always'
+end
+
+# Output fields
+
+@transposeImages
+field :occurrenceID do
+    fetch("pid")
+end
+
+@transposeImages
+field :type do
+    if get(:thisImage).fetch("additionalType").first().is_in("StillImage", "Sound", "MovingImage")?
+	get(:thisImage).fetch("additionalType").first().is_in("StillImage", "Sound", "MovingImage")
+end
+
+@transposeImages
+field :format, default: "image/jpeg"
+
+@transposeImages
+field :identifier do
+    get(:thisImage).fetch("previewUrl")
+end
+
+@transposeImages
+field :references do
+    compose("https://collections.tepapa.govt.nz/object/", get(:record_id)
+end
+
+@transposeImages
+field :title do
+    fetch("title")
+end
+
+@transposeImages
+field :publisher, default: "Museum of New Zealand Te Papa Tongarewa"
+
+@transposeImages
+field :license do
+    get(:thisImage).fetch("rights.title")
+end
+
+@transposeImages
+field :rightsHolder do
+    if get(:thisImage).fetch("rights.title").is_not("No Known Copyright Restrictions")?
+	set_value("Museum of New Zealand Te Papa Tongarewa")
+end

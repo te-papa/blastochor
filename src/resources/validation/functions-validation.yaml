@@ -79,22 +79,52 @@ clean_html:
   display_name: clean up html
   description: Remove junk like word formatting and FONT tags. Good to chain after retrieving descriptions.
   parameters: null
+compare_numbers:
+  function_name: compare_numbers
+  display_name: compare numbers
+  description: Compare numbers at two paths and return higher or lower.
+  parameters:
+    - parameter: path_one
+      required: true
+      multiple_allowed: false
+    - parameter: path_two
+      required: true
+      multiple_allowed: false
+    - parameter: use
+      required: true
+      multiple_allowed: false
 concatenate:
   function_name: concatenate
   display_name: combine list
   description: Combine a list of values together into one string. Done automatically before writing out.
   parameters: null
+contains:
+  function_name: contains
+  display_name: contains
+  description: Check if a string or list value contains a specific value or list of values.
+  parameters:
+    parameter: match
+    required: true
+    multiple_allowed: true
 continue_if:
   function_name: continue_if
   display_name: continue if
   description: Only run the following functions if a certain requirement is met.
   parameters:
-    - parameter: path
+    - parameter: predicate
       required: true
       multiple_allowed: false
-    - parameter: condition
+    - parameter: value
       required: true
       multiple_allowed: false
+    - parameter: functions
+      required: true
+      multiple_allowed: true
+count_list:
+  function_name: count_list
+  display_name: count list
+  description: Count the elements in a provided list value
+  parameters: null
 country_code:
   function_name: country_code
   display_name: country code
@@ -175,6 +205,14 @@ set_priority:
   display_name: set priority
   description: Set a number indicating priority based on the record's quality score.
   parameters: null
+split_on:
+  function_name: split_on
+  display_name: split on
+  description: Split a string value on a defined delimiter for further use or recombination.
+  parameters:
+    - parameter: delimiter
+      required: true
+      allow_multiple: false
 truncate:
   function_name: truncate
   display_name: truncate
@@ -195,4 +233,9 @@ use_group_labels:
   function_name: use_group_labels
   display_name: use group labels
   description: Use the group labels specified in your config file.
+  parameters: null
+wrap_value:
+  function_name: wrap_value
+  display_name: wrap_value
+  description: Wraps a value in "" for safety.
   parameters: null

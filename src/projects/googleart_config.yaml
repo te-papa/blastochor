@@ -7,8 +7,8 @@ api_key_env: TPAK-GOOG
 mapping_file: googleartsandculture.yaml
 input_dir: input_files
 output_dir: output_files
-use_skiplist: False
-skipfile: null
+use_skip_list: True
+skip_file: googleart_associations.csv
 min_image_size: 0
 max_list_size: 100
 clean_newlines: true
@@ -20,10 +20,10 @@ group_rows: true
 parent_label: sequence
 parent_fields:
   include: false
-  fields: subitemid, orderid, rights, filespec
+  fields: subitemid, orderid, rights, filespec, downloadUrl, object_irn, media_irn
 child_fields:
   include: true
-  fields: itemid, subitemid, orderid, rights, filetype, filespec
+  fields: itemid, subitemid, orderid, rights, filetype, filespec, downloadUrl, object_irn, media_irn
 ungrouped_fields:
   include: false
   fields: subitemid, orderid
@@ -43,17 +43,17 @@ timeout: 5
 attempts: 3
 
 # List mode settings
-list_source: googletestset.txt
+list_source: 202512-googleart.csv
 
 # Search/scroll mode settings
-record_limit: 1000
+record_limit: null
 size: 1000
 
 query: "*"
 sort: -_meta.modified
 
 filter:
-  collection: Art
+  collection: null
   allows_download: true
   keyword_fields: null
   keyword_values: null

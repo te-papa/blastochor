@@ -1,0 +1,25 @@
+- output_label:
+  - core
+  - identification
+  - multimedia
+  queries:
+    - q: *
+      endpoint: object
+      filters:
+        - type: equals
+          field: collection
+          value: Plants
+      sort: _meta.modified
+- queries:
+    - q: *
+      endpoint: taxon
+      filters:
+        - type: equals
+          field: kingdom
+          value: Plantae
+        - type: in
+          field: taxonRank
+          value:
+            - Subspecies
+            - Species
+            - Genus

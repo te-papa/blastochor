@@ -1,0 +1,145 @@
+# Mapfile for GBIF plants records - identification file
+
+# Record-level conditions
+reject_if do
+    fetch("hasRepresentation").absent?
+end
+
+# Hardcoded attributes
+
+# Variable attributes
+attribute :record_id, path: "id"
+
+attribute :thisTypeStatus do
+    get(:thisIdentification).fetch("typeStatus")
+end
+
+attribute :thisTaxon do
+    get(:thisIdentification).fetch("id").lookup("taxon")
+end
+
+attribute :identification do
+    fetch("identification")
+end
+
+# Record-level enrichments
+enrichment :transposeIdentifications do
+    transpose(get(:identification), local(:thisIdentification, this)) # defaults to 'always'
+end
+
+# Output fields
+
+@transposeIdentifications
+field :occurrenceID do
+    fetch("pid")
+end
+
+@transposeIdentifications
+field :identificationID do
+    compose("tepapa:collection/identification", get(:record_id), "/", get(:thisIdentification).fetch("id"))
+end
+
+@transposeIdentifications
+field :identificationQualifier do
+	local(:currentQualifier, get(:thisIdentification).fetch("qualifier"))
+	local(:qualifiedName, get(:currentTaxon).fetch("subspecies", "species", "genus").first)
+	if get_local(:currentQualifier).is_in("?", "s.l.", "s.s")?
+	compose(get_local(:qualifiedName), " ", get_local(:currentQualifier))
+	fallback(if get_local(:currentQualifier).is_in("aff.", "cf.")?
+	    compose(get_local(:currentQualifier), " ", get_local(:qualifiedName)))
+end
+
+@transposeIdentifications
+field :verbatimIdentification do
+    get(:thisIdentification).fetch("qualifiedName")
+end
+
+@transposeIdentifications
+field :typeStatus do
+    get(:thisTypeStatus).strip(" (possible)")
+end
+
+@transposeIdentifications
+field :identifiedBy do
+	get(:thisIdentification).fetch("identifiedBy.title")
+end
+
+@transposeIdentifications
+field :identifiedByID do
+    get(:thisIdentification).fetch("identifiedBy.id")
+	lookup("agent")
+	fetch("related").sort_by("title")
+	for_each(if fetch("title").lower.is_in("orcid", "wikidata")?).first
+	fetch ("contentUrl")
+end
+
+@transposeIdentifications
+field :dateIdentified do
+    get(:thisIdentification).fetch("dateIdentified")
+end
+
+@transposeIdentifications
+field :identificationRemarks do
+    if get(:thisTypeStatus).contains(" (possible)")?
+	compose(get(:currentTypeStatus).strip("(possible)").capitalise, "status uncertain")
+end
+
+@transposeIdentifications
+field :scientificName do
+    get(:thisTaxon).fetch("scientificName")
+end
+
+@transposeIdentifications
+field :taxonRank do
+    get(:thisTaxon).fetch("taxonRank")
+end
+
+@transposeIdentifications
+field :scientificNameAuthorship do
+    get(:thisTaxon).fetch("scientificNameAuthorshipSummary")
+end
+
+@transposeIdentifications
+field :higherClassification do
+    get(:thisTaxon).fetch("higherClassification")
+end
+
+@transposeIdentifications
+field :family do
+    get(:thisTaxon).fetch("family")
+end
+
+@transposeIdentifications
+field :subfamily do
+    get(:thisTaxon).fetch("subfamily")
+end
+
+@transposeIdentifications
+field :genus do
+    get(:thisTaxon).fetch("genus")
+end
+
+@transposeIdentifications
+field :subgenus do
+    get(:thisTaxon).fetch("subgenus")
+end
+
+@transposeIdentifications
+field :specificEpithet do
+    get(:thisTaxon).fetch("species")
+end
+
+@transposeIdentifications
+field :infraspecificEpithet do
+    get(:thisTaxon).fetch("subspecies")
+end
+
+@transposeIdentifications
+field :vernacularName do
+    get(:thisTaxon).fetch("vernacularName.title")
+end
+
+@transposeIdentifications
+field :nomenclaturalCode do
+    get(:thisTaxon).fetch("nomenclaturalCode)
+end

@@ -1,0 +1,7 @@
+q: *
+endpoint: object
+filters:
+  - type: equals
+    field: collection
+    value: Plants
+sort: _meta.modified

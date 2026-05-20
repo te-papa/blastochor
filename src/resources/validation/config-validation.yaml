@@ -19,6 +19,8 @@ optional:
   - coordinate_workaround
   - restrict_locality
   - emufile
+  - deletion_check
+  - substitution_map
 group:
   - parent_label
   - parent_fields

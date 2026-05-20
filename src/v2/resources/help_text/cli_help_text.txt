@@ -1,0 +1,14 @@
+Blastochor pulls in data, pushes and pulls it into shape, and outputs it in the way you want.
+
+Check the README for info about setting up a project, including instructions for building queries and parser files.
+
+To be run, a project needs:
+* A complete config file
+* At least one valid query
+* At least one valid parser file
+
+Projects are checked when they're saved (and again at runtime to be safe). If they're okay, they'll have the status 'Ready' on the project selection screen.
+
+Running a project can take a while. [Estimates]
+
+If a project isn't ready, selecting it will tell you what's missing.

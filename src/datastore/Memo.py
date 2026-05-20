@@ -13,9 +13,15 @@ def retrieve_from_memo(pid=None):
     return memo_record
 
 
-def add_to_memo(status=None, irn=None, endpoint=None, label=None, extension=None):
+def add_to_memo(status=None, pid=None, irn=None, endpoint=None, label=None, extension=None):
+    # Add a record to the memo using either the pid or irn and endpoint
     global memo
-    pid = format_pid(endpoint=endpoint, irn=irn)
+    if pid:
+        pid_parts = pid.split("/")
+        irn = pid_parts[-1]
+        endpoint = pid_parts[-2]
+    else:
+        pid = format_pid(endpoint=endpoint, irn=irn)
     memo_record = retrieve_from_memo(pid)
     if memo_record:
         return memo_record["pid"]

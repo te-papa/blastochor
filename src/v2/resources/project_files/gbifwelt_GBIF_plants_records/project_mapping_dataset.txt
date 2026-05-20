@@ -1,0 +1,6 @@
+# Mapfile for GBIF plants records - dataset-level
+
+flag :restrictedLocality do
+    if fetch("informationWithheld").is("standard statement whatever")?
+	compose("tepapa:collections/fieldcollection/", fetch("evidenceFor.atEvent.id"))
+end

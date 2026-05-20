@@ -1,0 +1,4 @@
+- output_label: unsplash_list
+  queries:
+    - record_ids: "unsplash_list.txt"
+      endpoint: "object"

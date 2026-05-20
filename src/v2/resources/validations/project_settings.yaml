@@ -1,0 +1,25 @@
+- field_name: api_key_env
+  required: false
+  value_type: string
+- field_name: clean_newlines
+  required: false
+  value_type: boolean
+- field_name: quiet
+  required: false
+  value_type: boolean
+- field_name: timeout
+  required: false
+  value_type: integer
+- field_name: attempts
+  required: false
+  value_type: integer
+- field_name: load_in
+  required: false
+  value_type: dict
+  sub_fields:
+    - field_name: name
+      required: true
+      value_type: string
+    - field_name: source
+      required: true
+      value_type: string

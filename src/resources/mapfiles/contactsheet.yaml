@@ -22,6 +22,12 @@
     - rights:
       - literal:
           path: hasRepresentation.i.rights.title
+    - width:
+      - literal:
+          path: hasRepresentation.i.width
+    - height:
+      - literal:
+          path: hasRepresentation.i.height
     - description:
       - literal:
           path: description

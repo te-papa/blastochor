@@ -1,0 +1,26 @@
+source: "../datasets/gbif/welt/gbifweltdata.csv"
+report_text: "gbif_deletion_report.txt"
+endpoint: object
+pid_match_label: occurrenceID
+fields:
+  - label: occurrenceID
+    read_from: occurrenceID
+  - label: basisOfRecord
+    hardcoded: PreservedSpecimen
+  - label: scientificName
+    read_from: family
+    alt_read_from: kingdom
+  - label: eventDate
+    read_from: eventDate
+  - label: license
+    read_from: license
+  - label: rightsHolder
+    read_from: rightsHolder
+  - label: institutionCode
+    read_from: institutionCode
+  - label: collectionCode
+    read_from: collectionCode
+  - label: dataGeneralizations
+    hardcoded: "Record details removed before full record deletion from dataset."
+  - label: informationWithheld
+    hardcoded: "Record removed from public access due to de-duplication or sensitivity."

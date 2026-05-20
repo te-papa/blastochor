@@ -1,8 +1,8 @@
 import os
-import yaml
-import json
 from datetime import datetime, timedelta
 from src.setup.Validator import ConfigValidator
+from src.util.IOInterface import load_file
+from src.datastore.Memo import memo, format_pid, retrieve_from_memo, add_to_memo, update_memo
 
 
 config = {}
@@ -49,13 +49,8 @@ def setup_project(project):
 
 def read_config_file(config_file, project):
     global config
-    print(os.getcwd())
-    try:
-        with open(config_file, "r", encoding="utf-8") as f:
-            print("Reading {}".format(config_file))
-            config = yaml.safe_load(f)
-    except IOError:
-        break_on_settings_error("No config file found")
+    print("Reading {}".format(config_file))
+    config = load_file(config_file)
 
     config_validator = ConfigValidator(config)
     if config_validator.fail:
@@ -85,8 +80,9 @@ def update_settings():
     set_mapfile()
     set_input_dir()
     set_output_dir()
-    set_skiplist()
+    set_skip_list()
     set_endpoint()
+    read_associations()
     load_country_codes()
     set_check_modified()
     format_export_string()
@@ -150,25 +146,25 @@ def set_output_dir():
             os.mkdir(output_dir)
 
 
-def set_skiplist():
-    # Reads in list of IRNs to skip if provided
-    if read_config("use_skiplist"):
-        populate_skiplist()
+def set_skip_list():
+    # Reads in list of association pids to skip if provided
+    # Is overridden if the item is also in a list to harvest
+    if read_config("use_skip_list"):
+        skip_file_path = "src/resources/associations/{}".format(read_config("skip_file"))
+        skip_data = load_file(skip_file_path)
+        skip_pids = [i.get("te_papa_id") for i in skip_data \
+                     if i.get("te_papa_id")]
+        if skip_pids:
+            for pid in skip_pids:
+                memo_record = retrieve_from_memo(pid)
+                if memo_record:
+                    if memo_record.get("status") != "skip":
+                        update_memo(pid, "status", "skip")
+                else:
+                    add_to_memo(pid=pid, status="skip")
 
-
-def populate_skiplist():
-    skiplist = []
-    skipfile = "{d}/{f}".format(d=read_config("input_dir"), r=read_config("skipfile"))
-    with open(read_config("skipfile"), 'r', encoding="utf-8") as f:
-        lines = f.readlines()
-
-    for line in lines:
-        skiplist.append(int(line.strip()))
-
-    write_config("skiplist", skiplist)
-
-    if not read_config("quiet"):
-        print("Skiplist populated")
+        if not read_config("quiet"):
+            print("Skip list populated")
 
 
 def set_endpoint():
@@ -178,12 +174,24 @@ def set_endpoint():
         print("No endpoint provided. Setting to object")
 
 
+def read_associations():
+    # Load list of associations between local records and a remote source
+    # Allows comparison of current data with records already exported
+    if read_config("check_associations"):
+        association_file = "src/resources/associations/{}".format(read_config("association_file"))
+        associations = load_file(association_file)
+        if associations:
+            if (associations[0].get("external_id")) and (associations[0].get("te_papa_id")):
+                write_config("associations", associations)
+            else:
+                break_on_settings_error("Associations file using incorrect field names")
+
+
 def load_country_codes():
-    try:
-        with open("src/resources/countrycodes.json") as f:
-            country_codes = json.load(f)
-            write_config("country_codes", country_codes)
-    except IOError:
+    country_codes = load_file("src/resources/countrycodes.json")
+    if country_codes:
+        write_config("country_codes", country_codes)
+    else:
         if not read_config("quiet"):
             print("No country code file found")
 
