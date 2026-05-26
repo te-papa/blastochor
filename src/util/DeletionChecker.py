@@ -24,8 +24,8 @@ def check_for_deletions(platform_id=None):
 					case _:
 						pass
 
-		if deletion_instructions:
-			substitute_records = create_substitute_records(deletion_instructions)
+			if deletion_instructions:
+				substitute_records = create_substitute_records(deletion_instructions)
 
 	return substitute_records
 
@@ -37,8 +37,11 @@ def read_pid_list():
 		project_name = "latest_export"
 	pid_list_path = f"{input_dir}/resources/maintenance/{project_name}_pids.txt"
 	pid_list = load_file(pid_list_path)
-	pid_list = pid_list.split("\n")
-	return pid_list
+	if pid_list:
+		pid_list = pid_list.split("\n")
+		return pid_list
+
+	return None
 
 
 def find_deleted_records(pid_list):

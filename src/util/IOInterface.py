@@ -11,23 +11,24 @@ def check_for_file(filepath):
 
 def load_file(filepath, delimiter=None, read_lines=False):
 	file_data = None
-	if filepath.endswith(".txt"):
-		with open(filepath, "r", encoding="utf-8") as f:
-			if read_lines:
-				file_data = f.readlines()
-			else:
-				file_data = f.read()
-	if filepath.endswith(".yaml"):
-		with open(filepath) as f:
-			file_data = yaml.safe_load(f)
-	elif filepath.endswith(".json"):
-		with open(filepath) as f:
-			file_data = json.load(f)
-	elif filepath.endswith(".csv"):
-		with open(filepath, newline="", encoding="utf-8") as f:
-			if not delimiter:
-				delimiter = ","
-			file_data = [row for row in csv.DictReader(f, delimiter=delimiter)]
+	if os.path.exists(filepath):
+		if filepath.endswith(".txt"):
+			with open(filepath, "r", encoding="utf-8") as f:
+				if read_lines:
+					file_data = f.readlines()
+				else:
+					file_data = f.read()
+		if filepath.endswith(".yaml"):
+			with open(filepath) as f:
+				file_data = yaml.safe_load(f)
+		elif filepath.endswith(".json"):
+			with open(filepath) as f:
+				file_data = json.load(f)
+		elif filepath.endswith(".csv"):
+			with open(filepath, newline="", encoding="utf-8") as f:
+				if not delimiter:
+					delimiter = ","
+				file_data = [row for row in csv.DictReader(f, delimiter=delimiter)]
 
 	return file_data
 
